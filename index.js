@@ -14,44 +14,43 @@ const splitCodePerLine = s => {
 
   for (let i = 0; i < s.length; i++) {
     curChar = s[i];
-    process.stdout.write((curChar === '\n' ? '\\n' : curChar) + '\t');
     
     if (curChar === '"') {
       escapeChar = !escapeChar;
-    }
-    
-    if (curChar === '\n' && !escapeChar) {
-      pushNewLine = true;
-    }
-    process.stdout.write('pushLine: ' + (pushNewLine ? 'T' : '-') + '\t');
-    
-    // Add current character (curChar) to buffer (stringLine) if it proceeds
-    // proceedes when:
-    //   + current character is not escaped (escapeChar false)
-    //   + current character is not \n (pushNewLIen false)
-    // if ( !escapeChar && !pushNewLine ) {
-    if ( !escapeChar && !pushNewLine ) {
+      stringLine += curChar;          // add current character to bufer
+    } else if (curChar === '\n') {
+      if (escapeChar) {
+        stringLine += curChar;        // add current character to bufer
+      } else {
+        if (stringLine.length > 0) {  // add new line
+          stringLineArray.push(stringLine);
+          stringLine = '';
+        }
+      }
+    } else {
       stringLine += curChar;
     }
-    process.stdout.write('esc: ' + (escapeChar ? 'T' : '-') + '\t');
-    process.stdout.write('buffer: ' + JSON.stringify(stringLine) + '\t');
-    
-    // push buffered string to stringLineArray after \n or when last char reached,
-    // if any buffer is available
-    if ((pushNewLine || i === s.length - 1) && stringLine.length > 0) {
+    // If it's the last character and proceeds add new line
+    if (i === s.length - 1 && stringLine.length > 0) {
       stringLineArray.push(stringLine);
-      pushNewLine = false;
-      stringLine = '';
-    } else if (pushNewLine) {
-      pushNewLine = false;
     }
-
-    console.log('out:', stringLineArray);
-
   }
 
   return stringLineArray;
 }
+
+/**
+ * Get previous character in the string, if exists, otherwise null
+ * @argument {string} s - String
+ * @argument {string} i - Current character index (previous character -> i -1)
+ * @return Previous character if any, otherwise null
+ */
+const getPrevChar = (s, i) => {
+  return (i > 0 && i < s.length)
+    ? s[i-1]
+    : null
+  ;
+};
 
 /**
  * Remove inline comments in the source code line
@@ -60,8 +59,30 @@ const splitCodePerLine = s => {
  */
 const removeInlineComments = s => {
   let curChar;
-  let 
+  let returnString = '';
+  let isString = false;
+  let isComment = false;
+  let isInlineComment = false;
+  for (let i = 0; i < s.length ; i++) {
+    curChar = s[i];
 
+    if (curChar === '"') {
+      !isString ? isString = !isString : null;
+      returnString += curChar;
+    } else {
+      if (isString) {
+        returnString += curChar;
+      } else if (curChar === ';') {
+        if (isComment) {
+          if (isInlineComment) {
+
+          }
+        } else {
+          isComment = true;
+        }
+      }
+    }
+  }
   // const nonInlineCommentRegEx = new RegExp('([^;\|]*);\|[^;\|]*\|;');
   // const nonInlineComment = nonInlineCommentRegEx.exec(s);
   // console.log('nonInlineComment:', nonInlineComment);
@@ -153,6 +174,7 @@ const parseLisp = autolispString => {
 };
 
 module.exports = {
+  getPrevChar,
   splitCodePerLine,
   removeInlineComments,
   removeLineComments,
