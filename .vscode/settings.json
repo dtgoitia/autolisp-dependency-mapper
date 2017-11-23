@@ -1,0 +1,10 @@
+{
+  "saveAndRun": {
+    "commands": [
+      {
+        "match": ".js*",
+        "cmd": "clear && npm run test"
+      }
+    ]
+  }
+}
