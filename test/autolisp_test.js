@@ -67,8 +67,11 @@ const test = describe('AutoLISP parser tests', function(){
       alisp.removeInlineComments('This is a test ;|with a comment|;, but not this')
     );
   });
-  it.skip('Remove single inline comment. Comment with double quotes', function(){
-    assert('This is a test , but not this' === alisp.removeInlineComments('This is a test ;|with "a" comment|;, but not this'));
+  it('Remove single inline comment. Comment with double quotes', function(){
+    assert.equal(
+      'This is a test , but not this',
+      alisp.removeInlineComments('This is a test ;|with "a" comment|;, but not this')
+    );
   });
   it.skip('Remove single inline comment. Code and comment with double quotes', function(){
     assert('This is "a" test , but not this' === alisp.removeInlineComments('This is "a" test ;|with "a" comment|;, but not this'));

@@ -68,8 +68,12 @@ const removeInlineComments = s => {
     process.stdout.write(curChar);
     if (curChar === '"') {
       process.stdout.write('  1')
-      !isString ? isString = !isString : null;
-      returnString += curChar;
+      if (isComment) {
+        null;
+      } else {
+        !isString ? isString = !isString : null;
+        returnString += curChar;
+      }
     } else {
       process.stdout.write('  2')
       if (isString) {
