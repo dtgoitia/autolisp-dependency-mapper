@@ -65,24 +65,60 @@ const removeInlineComments = s => {
   let isInlineComment = false;
   for (let i = 0; i < s.length ; i++) {
     curChar = s[i];
-
+    process.stdout.write(curChar);
     if (curChar === '"') {
+      process.stdout.write('  1')
       !isString ? isString = !isString : null;
       returnString += curChar;
     } else {
+      process.stdout.write('  2')
       if (isString) {
+        process.stdout.write('  3')
         returnString += curChar;
       } else if (curChar === ';') {
+        process.stdout.write('  4')
         if (isComment) {
+          // process.stdout.write('  5')
           if (isInlineComment) {
-
+            // process.stdout.write('  6')
+            if (getPrevChar(s, i) === '|') {
+              process.stdout.write('  7')
+              isInlineComment = false;
+              isComment = false;
+            }
           }
         } else {
+          process.stdout.write('  8')
           isComment = true;
+        }
+      } else if ( curChar === '|') {
+        process.stdout.write('  9')
+        if (isInlineComment) {
+          process.stdout.write('  10')
+          null;
+        } else {
+          process.stdout.write('  11')
+          if ( getPrevChar (s, i) === ';') {
+            process.stdout.write('  12')
+            isInlineComment = true;
+          }
+        }
+      } else {
+        process.stdout.write('  13')
+        if (isComment) {
+          null;
+        } else {
+          returnString += curChar;
         }
       }
     }
+    process.stdout.write('\tisComment: ' + (isComment ? 'T' : '-'));
+    process.stdout.write('\tisInlineComment: ' + (isInlineComment ? 'T' : '-'));
+    process.stdout.write('\treturnString: ' + returnString + '\n');
+
   }
+
+  return returnString;
   // const nonInlineCommentRegEx = new RegExp('([^;\|]*);\|[^;\|]*\|;');
   // const nonInlineComment = nonInlineCommentRegEx.exec(s);
   // console.log('nonInlineComment:', nonInlineComment);

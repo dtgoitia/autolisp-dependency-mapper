@@ -10,24 +10,41 @@ const data = '(defun functionName()\n  (princ "\nfunctionName has been triggered
 const test = describe('AutoLISP parser tests', function(){
 
   it('Split code in lines. Simple new line', function(){
-    assert.deepEqual(['This is a', 'test '], alisp.splitCodePerLine('This is a\ntest '));
+    assert.deepEqual(
+      ['This is a', 'test '],
+      alisp.splitCodePerLine('This is a\ntest ')
+    );
   });
   it('Split code in lines. Double new line', function(){
-    assert.deepEqual(['This', 'is a', 'test '], alisp.splitCodePerLine('This\nis a\n\ntest '));
+    assert.deepEqual(
+      ['This', 'is a', 'test '],
+      alisp.splitCodePerLine('This\nis a\n\ntest ')
+    );
   });
   it('Split code in lines. Spaces between lines', function(){
-    assert.deepEqual(['This','is a', ' ', 'test '], alisp.splitCodePerLine('This\nis a\n \n\ntest '));
+    assert.deepEqual(
+      ['This','is a', ' ', 'test '],
+      alisp.splitCodePerLine('This\nis a\n \n\ntest ')
+    );
   });
   it('Split code in lines. Scape comments', function(){
-    assert.deepEqual(['This','is a', ' ', 'test ', 'with "some\ndouble lines"'], alisp.splitCodePerLine('This\nis a\n \n\ntest \nwith "some\ndouble lines"'));
+    assert.deepEqual(
+      ['This','is a', ' ', 'test ', 'with "some\ndouble lines"'],
+      alisp.splitCodePerLine('This\nis a\n \n\ntest \nwith "some\ndouble lines"')
+    );
   });
   it('Split code in lines. Last character is a single new line', function(){
-    assert.deepEqual(['This','is a', ' ', 'test ', 'with "some\ndouble lines"'], alisp.splitCodePerLine('This\nis a\n \n\ntest \nwith "some\ndouble lines"\n'));
+    assert.deepEqual(
+      ['This','is a', ' ', 'test ', 'with "some\ndouble lines"'],
+      alisp.splitCodePerLine('This\nis a\n \n\ntest \nwith "some\ndouble lines"\n')
+    );
   });
   it('Split code in lines. Last characters are various new lines', function(){
-    assert.deepEqual(['This','is a', ' ', 'test ', 'with "some\ndouble lines"'], alisp.splitCodePerLine('This\nis a\n \n\ntest \nwith "some\ndouble lines"\n\n\n'));
+    assert.deepEqual(
+      ['This','is a', ' ', 'test ', 'with "some\ndouble lines"'],
+      alisp.splitCodePerLine('This\nis a\n \n\ntest \nwith "some\ndouble lines"\n\n\n')
+    );
   });
-
 
 
   it('Get previous char. Case: normal', function(){
@@ -42,8 +59,13 @@ const test = describe('AutoLISP parser tests', function(){
   it('Get previous char. Case: index out of range', function(){
     assert(null === alisp.getPrevChar('abcd', 10));
   });
-  it.skip('Remove single inline comment', function(){
-    assert('This is a test , but not this' === alisp.removeInlineComments('This is a test ;|with a comment|;, but not this'));
+
+
+  it('Remove single inline comment', function(){
+    assert.equal(
+      'This is a test , but not this',
+      alisp.removeInlineComments('This is a test ;|with a comment|;, but not this')
+    );
   });
   it.skip('Remove single inline comment. Comment with double quotes', function(){
     assert('This is a test , but not this' === alisp.removeInlineComments('This is a test ;|with "a" comment|;, but not this'));
