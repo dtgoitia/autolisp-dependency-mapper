@@ -58,66 +58,71 @@ const getPrevChar = (s, i) => {
  * @return {string} - Clean source code line
  */
 const removeInlineComments = s => {
+  //
+  // TODO rename the function to "removeComments" -------------------------------
+  //
   let curChar;
   let returnString = '';
-  let isString = false;
-  let isComment = false;
-  let isInlineComment = false;
+  let isQuotedString = false;
+  let isLineComment = false;
+  let isBlockComment = false;
   for (let i = 0; i < s.length ; i++) {
     curChar = s[i];
     process.stdout.write(curChar);
     if (curChar === '"') {
       process.stdout.write('  1')
-      if (isComment) {
+      if (isLineComment) {
         null;
       } else {
-        !isString ? isString = !isString : null;
+        !isQuotedString ? isQuotedString = !isQuotedString : null;
         returnString += curChar;
       }
     } else {
       process.stdout.write('  2')
-      if (isString) {
+      if (isQuotedString) {
         process.stdout.write('  3')
         returnString += curChar;
       } else if (curChar === ';') {
         process.stdout.write('  4')
-        if (isComment) {
+        if (isLineComment) {
           // process.stdout.write('  5')
-          if (isInlineComment) {
+          if (isBlockComment) {
             // process.stdout.write('  6')
             if (getPrevChar(s, i) === '|') {
               process.stdout.write('  7')
-              isInlineComment = false;
-              isComment = false;
+              isBlockComment = false;
+              isLineComment = false;
             }
           }
         } else {
           process.stdout.write('  8')
-          isComment = true;
+          isLineComment = true;
         }
       } else if ( curChar === '|') {
         process.stdout.write('  9')
-        if (isInlineComment) {
-          process.stdout.write('  10')
-          null;
-        } else {
-          process.stdout.write('  11')
-          if ( getPrevChar (s, i) === ';') {
-            process.stdout.write('  12')
-            isInlineComment = true;
+        if (isLineComment) {
+          if (isBlockComment) {
+            process.stdout.write('  10')
+            null;
+          } else {
+            process.stdout.write('  11')
+            if ( getPrevChar (s, i) === ';') {
+              process.stdout.write('  12')
+              isBlockComment = true;
+            }
           }
         }
       } else {
         process.stdout.write('  13')
-        if (isComment) {
+        if (isLineComment) {
           null;
         } else {
           returnString += curChar;
         }
       }
     }
-    process.stdout.write('\tisComment: ' + (isComment ? 'T' : '-'));
-    process.stdout.write('\tisInlineComment: ' + (isInlineComment ? 'T' : '-'));
+    process.stdout.write('\tisComment: ' + (isLineComment ? 'T' : '-'));
+    process.stdout.write('\tisInlineComment: ' + (isBlockComment ? 'T' : '-'));
     process.stdout.write('\treturnString: ' + returnString + '\n');
 
   }
