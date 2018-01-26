@@ -1,94 +1,145 @@
+const fs = require('fs');
 const mocha = require('mocha');
 const assert = require('assert');
 const nativeFunctions = require('../nativeFunctions');
 const alisp = require('../');
 
-// const filePath = 'lsp/test.lsp';
+// Read external lsp file
+const filePath = 'lsp/test.lsp';
+// const filePath = 'lsp/real-autolisp.lsp';
+const fileData = fs.readFileSync(filePath).toString();
 
 const data = '(defun functionName()\n  (princ "\nfunctionName has been triggered!")\n)';
 
-const test = describe('AutoLISP parser tests', function(){
+describe('AutoLISP. Split code in lines', function(){
 
-  it('Split code in lines. Simple new line', function(){
-    assert.deepEqual(
-      ['This is a', 'test '],
+  it('Simple new line', function(){
+    assert.deepEqual(['This is a', 'test '],
       alisp.splitCodePerLine('This is a\ntest ')
     );
   });
-  it('Split code in lines. Double new line', function(){
-    assert.deepEqual(
-      ['This', 'is a', 'test '],
+  it('Double new line', function(){
+    assert.deepEqual(['This', 'is a', 'test '],
       alisp.splitCodePerLine('This\nis a\n\ntest ')
     );
   });
-  it('Split code in lines. Spaces between lines', function(){
-    assert.deepEqual(
-      ['This','is a', ' ', 'test '],
+  it('Spaces between lines', function(){
+    assert.deepEqual(['This','is a', ' ', 'test '],
       alisp.splitCodePerLine('This\nis a\n \n\ntest ')
     );
   });
-  it('Split code in lines. Scape comments', function(){
-    assert.deepEqual(
-      ['This','is a', ' ', 'test ', 'with "some\ndouble lines"'],
+  it('Scape comments', function(){
+    assert.deepEqual(['This','is a', ' ', 'test ', 'with "some\ndouble lines"'],
       alisp.splitCodePerLine('This\nis a\n \n\ntest \nwith "some\ndouble lines"')
     );
   });
-  it('Split code in lines. Last character is a single new line', function(){
-    assert.deepEqual(
-      ['This','is a', ' ', 'test ', 'with "some\ndouble lines"'],
+  it('Last character is a single new line', function(){
+    assert.deepEqual(['This','is a', ' ', 'test ', 'with "some\ndouble lines"'],
       alisp.splitCodePerLine('This\nis a\n \n\ntest \nwith "some\ndouble lines"\n')
     );
   });
-  it('Split code in lines. Last characters are various new lines', function(){
-    assert.deepEqual(
-      ['This','is a', ' ', 'test ', 'with "some\ndouble lines"'],
+  it('Last characters are various new lines', function(){
+    assert.deepEqual(['This','is a', ' ', 'test ', 'with "some\ndouble lines"'],
       alisp.splitCodePerLine('This\nis a\n \n\ntest \nwith "some\ndouble lines"\n\n\n')
     );
   });
+});
 
-
-  it('Get previous char. Case: normal', function(){
-    assert('a' === alisp.getPrevChar('abcd', 1));
+describe('AutoLISP. Get previous character:', function(){
+  it('Normal', function(){
+    assert.equal(alisp.getPrevChar('abcd', 1), 'a');
   });
-  it('Get previous char. Case: current character is the last', function(){
-    assert('c' === alisp.getPrevChar('abcd', 3));
+  it('Current character is the first', function(){
+    assert.equal(alisp.getPrevChar('abcd', 0), null);
   });
-  it('Get previous char. Case: no previous character', function(){
-    assert(null === alisp.getPrevChar('abcd', 0));
+  it('Current character is the last', function(){
+    assert.equal(alisp.getPrevChar('abcd', 3), 'c');
   });
-  it('Get previous char. Case: index out of range', function(){
-    assert(null === alisp.getPrevChar('abcd', 10));
+  it('No previous character', function(){
+    assert.equal(alisp.getPrevChar('abcd', 0), null);
   });
-
-
-  it('Remove single inline comment', function(){
-    assert.equal(
-      'This is a test , but not this',
-      alisp.removeInlineComments('This is a test ;|with a comment|;, but not this')
-    );
-  });
-  it('Remove single inline comment. Comment with double quotes', function(){
-    assert.equal(
-      'This is a test , but not this',
-      alisp.removeInlineComments('This is a test ;|with "a" comment|;, but not this')
-    );
-  });
-  it.skip('Remove single inline comment. Code and comment with double quotes', function(){
-    assert('This is "a" test , but not this' === alisp.removeInlineComments('This is "a" test ;|with "a" comment|;, but not this'));
-  });
-  it.skip('Remove normal comment', function(){
-    assert('This is a test ' === alisp.removeLineComments('This is a test ;;with a comment'));
-  });
-  it.skip('Remove multiple inline comments', function(){
-    assert('This is great!' === alisp.removeInlineComments('This is ;|not|;great;|at all|;!'));
-  });
-  it.skip('Split in chunks', function(){
-    assert(alisp.splitInChunks(data) === ['defun', 'functionName()', 'princ', '"\nfunctionName has been triggered!"']);
+  it('Index out of range', function(){
+    assert.equal(alisp.getPrevChar('abcd', 10), null);
   });
 });
 
+describe('AutoLISP. Get next character:', function(){
+  it('Normal', function(){
+    assert.equal(alisp.getNextChar('abcd', 1), 'c');
+  });
+  it('Current character is the first', function(){
+    assert.equal(alisp.getNextChar('abcd', 0), 'b');
+  });
+  it('Current character is the last', function(){
+    assert.equal(alisp.getNextChar('abcd', 3), null);
+  });
+  it('No next character', function(){
+    assert.equal(alisp.getNextChar('abcd', 3), null);
+  });
+  it('Index out of range', function(){
+    assert.equal(alisp.getNextChar('abcd', 10), null);
+  });
+});
 
+describe('AutoLISP. Remove comments:', function(){
+  it('Single line comment', function(){
+    assert.equal('This is a test',
+      alisp.removeComments('This is a test;; with ;a comment'));
+  });
+  it('Multiple line comments', function(){
+    assert.equal('This is a test, with a seccond line',
+      alisp.removeComments('This is a test; with a comment\n, with a seccond line; and a second comment'));
+  });
 
+  it('Single line comment', function(){
+    assert.equal('This is a test , but not this',
+      alisp.removeComments('This is a test ;|with a comment|;, but not this'));
+  });
+  it('Single inline comment. Comment with double quotes', function(){
+    assert.equal('This is a test , but not this',
+      alisp.removeComments('This is a test ;|with "a" comment|;, but not this'));
+  });
+  it('Single inline comment. Code and comment with double quotes', function(){
+    assert.equal('This is "a" test , but not this',
+      alisp.removeComments('This is "a" test ;|with "a" comment|;, but not this'));
+  });
+  it('Ringle multiline comment. Code and comment with double quotes', function(){
+    assert.equal('This is "a" test ,\nbut not this',
+      alisp.removeComments('This is "a" test ;|with "a" comment|;,\nbut not this'));
+  });
+  it('Multiple multiline comments. Code and comment with double quotes', function(){
+    assert.equal('This is "a" test,\nbut not this',
+      alisp.removeComments('This is ;|\nnot\n|;"a" test;|with "a" comment|;,\nbut not this'));
+  });
+});
 
+describe('AutoLISP. Clean spaces, tabulations and new lines:', function() {
+  // it('Double spaces + newlines + comment', function(){
+  //   assert.equal(
+  //     alisp.removeTabulationsAndNewLines("(defun DT:MyFunction ( ss / i )\n  ; Return selection set, if any\n  (setq ss (ssget))\n);END defun"),
+  //     "(defun DT:MyFunction ( ss / i ) (setq ss (ssget)))"
+  //   );
+  // });
+  // it('Tabulation + newlines + comment', function(){
+  //   assert.equal(
+  //     alisp.removeTabulationsAndNewLines("(defun DT:MyFunction ( ss / i )\n\t; Return selection set, if any\n\t(setq ss (ssget))\n);END defun"),
+  //     "(defun DT:MyFunction ( ss / i ) (setq ss (ssget)))"
+  //   );
+  // });
+});
 
+// describe('AutoLISP. Split code in chunks:', function() {
+//   it.skip('Split in chunks', function(){
+//     assert(alisp.splitInChunks(data) === ['defun', 'functionName()', 'princ', '"\nfunctionName has been triggered!"']);
+//   });
+// });
 
+describe('AutoLISP. Clean, parse and get dependencies', function() {
+  it('Untitled', function() {
+    // console.log(`fileData:\n${fileData}\n`);
+    assert.equal(
+      alisp.parseLisp(fileData),
+      "."
+    );
+  });
+});

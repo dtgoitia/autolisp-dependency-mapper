@@ -9,7 +9,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {},
+  "dependencies": {
+    "elparser": "0.0.9"
+  },
   "devDependencies": {
     "mocha": "^4.0.1"
   }
